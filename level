@@ -1,3 +1,144 @@
+task.spawn(function()
+    local player = game.Players.LocalPlayer
+    local gui = Instance.new("ScreenGui")
+    gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(0.4, 0, 0.3, 0) -- Nhỏ hơn một chút
+    frame.Position = UDim2.new(0.3, 0, 0.15, 0)
+    frame.BackgroundColor3 = Color3.fromRGB(255, 223, 230)
+    frame.BackgroundTransparency = 1
+    frame.BorderSizePixel = 0
+    frame.Parent = gui
+
+    local border = Instance.new("UIStroke")
+    border.Thickness = 3
+    border.Color = Color3.fromRGB(255, 255, 255)
+    border.Parent = frame
+
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0.25, 0)
+    corner.Parent = frame
+
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, -20, 0.4, 0)
+    textLabel.Position = UDim2.new(0, 10, 0, 5)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = "🔑 Key: 0.5$ / 10.000 VNĐ / 20M (1 tuần) 💖\n🔑 Buy now to unlock script!"
+    textLabel.Font = Enum.Font.FredokaOne
+    textLabel.TextSize = 18
+    textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    textLabel.TextStrokeTransparency = 0
+    textLabel.TextStrokeColor3 = Color3.fromRGB(255, 105, 180)
+    textLabel.TextWrapped = true
+    textLabel.TextYAlignment = Enum.TextYAlignment.Center
+    textLabel.Parent = frame
+
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0.55, 0, 0.12, 0) -- Nhỏ hơn
+    button.Position = UDim2.new(0.225, 0, 0.55, 0)
+    button.BackgroundColor3 = Color3.fromRGB(255, 180, 200)
+    button.Text = "📋 Copy Discord Link"
+    button.Font = Enum.Font.FredokaOne
+    button.TextSize = 14 -- Chữ nhỏ hơn tí
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Parent = frame
+
+    local buttonStroke = Instance.new("UIStroke")
+    buttonStroke.Thickness = 2
+    buttonStroke.Color = Color3.fromRGB(255, 105, 180)
+    buttonStroke.Parent = button
+
+    local buttonCorner = Instance.new("UICorner")
+    buttonCorner.CornerRadius = UDim.new(0.3, 0)
+    buttonCorner.Parent = button
+
+    button.MouseEnter:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(255, 160, 190)
+    end)
+
+    button.MouseLeave:Connect(function()
+        button.BackgroundColor3 = Color3.fromRGB(255, 180, 200)
+    end)
+
+    button.MouseButton1Click:Connect(function()
+        setclipboard("https://discord.gg/A5aDk94a")
+        button.Text = "✅ Copied!"
+        button.BackgroundColor3 = Color3.fromRGB(255, 130, 160)
+        task.wait(1.5)
+        button.Text = "📋 Copy Discord Link"
+        button.BackgroundColor3 = Color3.fromRGB(255, 180, 200)
+    end)
+
+    -- 🔥 Loading Script Text (Moved Below Discord Button)
+    local loadingLabel = Instance.new("TextLabel")
+    loadingLabel.Size = UDim2.new(1, 0, 0.1, 0)
+    loadingLabel.Position = UDim2.new(0, 0, 0.7, 0) -- Căn lại
+    loadingLabel.BackgroundTransparency = 1
+    loadingLabel.Text = "⏳ Loading Script..."
+    loadingLabel.Font = Enum.Font.FredokaOne
+    loadingLabel.TextSize = 16
+    loadingLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    loadingLabel.TextStrokeTransparency = 0
+    loadingLabel.TextStrokeColor3 = Color3.fromRGB(255, 105, 180)
+    loadingLabel.Parent = frame
+
+    -- 🔥 Progress Bar (Countdown Timer)
+    local progressFrame = Instance.new("Frame")
+    progressFrame.Size = UDim2.new(0.8, 0, 0.08, 0)
+    progressFrame.Position = UDim2.new(0.1, 0, 0.85, 0)
+    progressFrame.BackgroundColor3 = Color3.fromRGB(255, 200, 220)
+    progressFrame.BorderSizePixel = 0
+    progressFrame.Parent = frame
+
+    local progressBar = Instance.new("Frame")
+    progressBar.Size = UDim2.new(1, 0, 1, 0) -- Ban đầu đầy
+    progressBar.BackgroundColor3 = Color3.fromRGB(255, 130, 160)
+    progressBar.BorderSizePixel = 0
+    progressBar.Parent = progressFrame
+
+    local progressCorner = Instance.new("UICorner")
+    progressCorner.CornerRadius = UDim.new(0.4, 0)
+    progressCorner.Parent = progressFrame
+
+    local progressBarCorner = Instance.new("UICorner")
+    progressBarCorner.CornerRadius = UDim.new(0.4, 0)
+    progressBarCorner.Parent = progressBar
+
+    local TweenService = game:GetService("TweenService")
+    local tweenInfo = TweenInfo.new(20, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local goal = {Size = UDim2.new(0, 0, 1, 0)}
+    local tween = TweenService:Create(progressBar, tweenInfo, goal)
+
+    -- 🌟 Hiệu ứng Fade-in
+    for i = 1, 20 do
+        frame.BackgroundTransparency = 1 - (i * 0.05)
+        textLabel.TextTransparency = 1 - (i * 0.05)
+        loadingLabel.TextTransparency = 1 - (i * 0.05)
+        button.TextTransparency = 1 - (i * 0.05)
+        task.wait(0.05)
+    end
+
+    -- ⏳ Chạy progress bar
+    tween:Play()
+
+    -- ⏳ Đợi 20 giây
+    tween.Completed:Wait()
+
+    -- 🌙 Hiệu ứng Fade-out (Đồng bộ thời gian)
+    for i = 1, 40 do
+        local transparencyStep = i * 0.025
+        frame.BackgroundTransparency = transparencyStep
+        textLabel.TextTransparency = transparencyStep
+        loadingLabel.TextTransparency = transparencyStep
+        button.TextTransparency = transparencyStep
+        progressBar.BackgroundTransparency = transparencyStep
+        progressFrame.BackgroundTransparency = transparencyStep
+        task.wait(0.05)
+    end
+
+    gui:Destroy()
+end)
 
 wait(20)
 if not game:IsLoaded() then
