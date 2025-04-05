@@ -229,7 +229,7 @@ local function sendWebhook(serverName, serverID, shopName, ownerName, isActive, 
                 ["Content-Type"] = "application/json",
             },
             Body = httpService:JSONEncode({
-                content = "Món đồ mới!",
+                content = "🌸Đã tìm thấy món đồ mới trong shop🌸",
                 embeds = { embed },
             }),
         })
