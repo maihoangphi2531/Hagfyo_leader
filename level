@@ -4,7 +4,7 @@ task.spawn(function()
     gui.Parent = player:FindFirstChild("PlayerGui") or player:WaitForChild("PlayerGui")
 
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(0.4, 0, 0.3, 0) -- Nhỏ hơn một chútsss
+    frame.Size = UDim2.new(0.4, 0, 0.3, 0) -- Nhỏ hơn một chút
     frame.Position = UDim2.new(0.3, 0, 0.15, 0)
     frame.BackgroundColor3 = Color3.fromRGB(255, 223, 230)
     frame.BackgroundTransparency = 1
@@ -936,19 +936,23 @@ local c3 = {
     'MinibossExit', 'ArenaEntry0', 'ArenaEntry1', 'ArenaEntry2', 'WaveStartGate', 'OutsideTeleport', 'WaveExit'
 }
 
--- Nếu ak == 43 thì loại bỏ WaveStarter
-if ak == 43 then
-    table.remove(c3, table.find(c3, 'WaveStarter'))
-end
-
--- Tạo cờ để không thêm nhiều lần
+-- Cờ kiểm tra để không thêm BossDoorTrigger trùng
 local isBossDoorAdded = false
 
--- Chạy kiểm tra định kỳ
-task.spawn(function()
-    while true do
-        task.wait(1) -- Kiểm tra mỗi 1 giây (có thể điều chỉnh)
-        if not isBossDoorAdded then
+-- Nếu ak == 43 thì thêm BossDoorTrigger và xóa WaveStarter luôn
+if ak == 43 then
+    table.remove(c3, table.find(c3, 'WaveStarter'))
+    if not table.find(c3, "BossDoorTrigger") then
+        table.insert(c3, "BossDoorTrigger")
+        isBossDoorAdded = true
+    end
+end
+
+-- Nếu chưa thêm BossDoorTrigger thì kiểm tra định kỳ
+if not isBossDoorAdded then
+    task.spawn(function()
+        while true do
+            task.wait(1)
             local missionObjects = workspace:FindFirstChild("MissionObjects")
             if missionObjects then
                 local waveStartGate = missionObjects:FindFirstChild("WaveStartGate")
@@ -957,16 +961,19 @@ task.spawn(function()
                     if timer and timer:FindFirstChild("SurfaceGui") then
                         local title = timer.SurfaceGui:FindFirstChild("Title")
                         if title and title:IsA("TextLabel") and title.Text == "FINAL FLOOR" then
-                            table.insert(c3, "BossDoorTrigger")
-                            isBossDoorAdded = true
-                            print("Đã thêm BossDoorTrigger vào bảng c3.")
+                            if not table.find(c3, "BossDoorTrigger") then
+                                table.insert(c3, "BossDoorTrigger")
+                                isBossDoorAdded = true
+                                print("Đã thêm BossDoorTrigger do FINAL FLOOR.")
+                            end
                         end
                     end
                 end
             end
         end
-    end
-end)
+    end)
+end
+
 
 local c4 = {'Scarecrow1', 'Scarecrow2', 'Scarecrow3'}
 local c5 = {
