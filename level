@@ -1,3 +1,4 @@
+
 task.spawn(function()
     local player = game.Players.LocalPlayer
     local gui = Instance.new("ScreenGui")
@@ -139,7 +140,6 @@ task.spawn(function()
 
     gui:Destroy()
 end)
-
 wait(20)
 pcall(function()
     keypress(0x50) -- 0x50 là mã ASCII của phím P
@@ -923,7 +923,7 @@ local c2 = {
     [1] = 5
 }
 local c3 = {
-    'Checkpoint1','NextFloorTeleporter','WaveStarter', 'Checkpoint2', 'Checkpoint3', 'Checkpoint4', 'Checkpoint5', 'Checkpoint6', 'Checkpoint7',
+    'Checkpoint1','WaveStarter', 'Checkpoint2', 'Checkpoint3', 'Checkpoint4', 'Checkpoint5', 'Checkpoint6', 'Checkpoint7',
     'Checkpoint8', 'Checkpoint9', 'Checkpoint10', 'CutsceneTrigger', 'Main', 'CaveTrigger', 'BossIntroTrigger',
     'TownTalkPart', 'BridgeTrigger', 'BoulderTrigger', 'BoulderStopTrigger', 'Cage1Marker', 'Cage2Marker',
     'CannonTrigger', 'CastleTrigger', 'WallsCheckpoint', 'HammerReset1', 'WallsTrigger', 'WallsFinalTrigger',
@@ -933,7 +933,7 @@ local c3 = {
     'CastleGateTrigger', 'SceneTrigger', 'OutsideBossTrigger', 'Area1Trigger', 'Area2Trigger', 'Area3Trigger',
     'FinishRing', 'StartWaveDefense', 'Trigger1', 'Trigger2', 'Trigger3', 'BossCutsceneTrigger', 'FloorTrigger',
     'BossCutscene', 'BottomElevatorTrigger', 'MiddleElevatorTrigger', 'TopElevatorTrigger', 'ObbyTrigger5',
-    'MinibossExit', 'ArenaEntry0', 'ArenaEntry1', 'ArenaEntry2', 'WaveStartGate', 'OutsideTeleport', 'WaveExit'
+    'MinibossExit', 'ArenaEntry0', 'ArenaEntry1', 'ArenaEntry2'
 }
 
 -- Cờ kiểm tra để không thêm BossDoorTrigger trùng
@@ -4770,6 +4770,8 @@ do
     end
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer or Players:GetPlayers()[1] 
+local movedToTimer = false -- đảm bảo chỉ chạy 1 lần
+
 function AutoCheckpoint()
     task.spawn(function()
         while Toggles.Autofarm.Value do
@@ -4779,56 +4781,86 @@ function AutoCheckpoint()
                     local hrp = character:FindFirstChild("HumanoidRootPart")
                     if hrp then
                         local missionObjects = workspace:FindFirstChild("MissionObjects")
+                        local missionStart = missionObjects and missionObjects:FindFirstChild("MissionStart")
+                        local missionTimer = missionStart and missionStart:FindFirstChild("MissionTimer")
+                        local surfaceGui = missionTimer and missionTimer:FindFirstChild("SurfaceGui")
+                        local collider = missionStart and missionStart:FindFirstChild("Collider")
+                        local timerLabel = surfaceGui and surfaceGui:FindFirstChild("Timer")
 
-                        -- Ưu tiên: WaveExitModel.MeshPart
-                        if missionObjects then
-                            local waveExit = missionObjects:FindFirstChild("WaveExitModel")
-                            if waveExit then
-                                local meshPart = waveExit:FindFirstChild("MeshPart")
-                                if meshPart then
-                                    hrp.CFrame = meshPart.CFrame + Vector3.new(0, 3, 0)
-                                    task.wait(0.5)
+                        local shouldSkip = false
+
+                        -- Đảm bảo label load xong
+                        if timerLabel and timerLabel:IsA("TextLabel") and not movedToTimer then
+                            -- Chờ đến khi Text là "--"
+                            local attempts = 0
+                            while timerLabel.Text ~= "--" and attempts < 50 do
+                                task.wait(0.1)
+                                attempts += 1
+                            end
+
+                            if timerLabel.Text == "--" and collider and collider:IsA("BasePart") then
+                                hrp.CFrame = collider.CFrame + Vector3.new(0, 5, 0)
+                                movedToTimer = true
+                                shouldSkip = true
+                                warn("✅ Đã dịch chuyển đến Timer checkpoint")
+                                task.wait(1)
+                            end
+                        end
+
+                        if not shouldSkip then
+                            -- Ưu tiên: WaveExitModel.MeshPart
+                            if missionObjects then
+                                local waveExit = missionObjects:FindFirstChild("WaveExitModel")
+                                if waveExit then
+                                    local meshPart = waveExit:FindFirstChild("MeshPart")
+                                    if meshPart then
+                                        hrp.CFrame = meshPart.CFrame
+                                        task.wait(0.5)
+                                    end
+                                end
+                            end
+
+                            -- Tiếp theo: WaveStartGate.Collider
+                            if missionObjects then
+                                local waveGate = missionObjects:FindFirstChild("WaveStartGate")
+                                if waveGate then
+                                    local targetPart = waveGate:FindFirstChild("Collider")
+                                    if targetPart then
+                                        hrp.CFrame = targetPart.CFrame
+                                        task.wait(0.5)
+                                    end
                                 end
                             end
                         end
 
-                        -- Tiếp theo: WaveStartGate.Collider
-                        if missionObjects then
-                            local waveGate = missionObjects:FindFirstChild("WaveStartGate")
-                            if waveGate then
-                                local targetPart = waveGate:FindFirstChild("Collider")
-                                if targetPart then
-                                    hrp.CFrame = targetPart.CFrame + Vector3.new(0, 3, 0)
-                                    task.wait(0.5)
-                                end
+                        -- Cuối cùng: TouchInterest
+                        for _, C in pairs(workspace:GetDescendants()) do
+                            if C and C.Name == "TouchInterest" and C.Parent and
+                                (table.find(c3, C.Parent.Name) or (C.Parent.Parent and table.find(c3, C.Parent.Parent.Name))) then
+                                task.spawn(function()
+                                    C.Parent.CanCollide = false
+                                    C.Parent.Anchored = true
+                                    C.Parent.Transparency = 1
+                                    C.Parent.CFrame = CFrame.new(aG.Position)
+                                    task.wait(0.25)
+                                    if C and C.Parent then
+                                        C.Parent.CFrame = CFrame.new(Vector3.new(0, 0, 0))
+                                    end
+                                end)
                             end
                         end
                     end
                 end
 
-                -- Cuối cùng: Xử lý TouchInterest
-                for _, C in pairs(workspace:GetDescendants()) do
-                    if C and C.Name == "TouchInterest" and C.Parent and
-                        (table.find(c3, C.Parent.Name) or C.Parent.Parent and table.find(c3, C.Parent.Parent.Name)) then
-                        task.spawn(function()
-                            C.Parent.CanCollide = false
-                            C.Parent.Anchored = true
-                            C.Parent.Transparency = 1
-                            C.Parent.CFrame = CFrame.new(aG.Position)
-                            task.wait(0.25)
-                            if C and C.Parent then
-                                C.Parent.CFrame = CFrame.new(Vector3.new(0, 0, 0))
-                            end
-                        end)
-                    end
-                end
+                task.wait(0.5)
+                if ay then break end
             end
 
             task.wait(0.5)
-            if ay then break end
         end
     end)
 end
+
 
     function MobCounter()
         task.spawn(function()
@@ -5590,16 +5622,6 @@ Toggles.Autofarm:OnChanged(function(fx)
             fC.Parent = workspace;
             fC.Transparency = 1;
             fu = true
-        end
-        if ai:FindFirstChild('MissionStart') and alive() then
-            for B, C in pairs(ai.MissionStart:GetDescendants()) do
-                if C:IsA('TouchTransmitter') and C.Parent then
-                    C.Parent.CanCollide = false;
-                    C.Parent.Anchored = true;
-                    C.Parent.CFrame = CFrame.new(aG.Position)
-                    break
-                end
-            end
         end
         if ar or at then
             AutoCheckpoint()
