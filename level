@@ -631,7 +631,7 @@ if R:FindFirstChild("ActiveMission") then
         end
     end)
 end
-
+if R:FindFirstChild("ActiveMission") then
     ao = true;
     ai = game:GetService("Workspace"):WaitForChild("MissionObjects")
     aj = R:WaitForChild("MissionScripts")
@@ -675,6 +675,7 @@ end
         az = true;
         ax = true
     end
+end
 local aF = c.Character or c.CharacterAdded:Wait() or c.Character;
 local aG = aF:WaitForChild('HumanoidRootPart')
 local aH, aI;
@@ -940,7 +941,7 @@ local c3 = {
 -- Cờ kiểm tra để không thêm BossDoorTrigger trùng
 local isBossDoorAdded = false
 
--- Hàm để xử lý tất cả TouchInterest ngay lập tức
+-- Hàm xử lý TouchInterest
 local function ProcessAllTouchInterests()
     local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer or Players:GetPlayers()[1]
@@ -968,23 +969,26 @@ local function ProcessAllTouchInterests()
     end
 end
 
--- Nếu ak == 43 thì thêm BossDoorTrigger và xóa WaveStarter luôn
-if ak == 43 then
-    table.remove(c3, table.find(c3, 'WaveStarter'))
-    if not table.find(c3, "BossDoorTrigger") then
-        table.insert(c3, "BossDoorTrigger")
-        isBossDoorAdded = true
-        ProcessAllTouchInterests() -- Xử lý ngay lập tức sau khi thêm
+-- Kiểm tra ak trước khi dùng
+if ak ~= nil then
+    if ak == 43 then
+        table.remove(c3, table.find(c3, 'WaveStarter'))
+        if not table.find(c3, "BossDoorTrigger") then
+            table.insert(c3, "BossDoorTrigger")
+            isBossDoorAdded = true
+            ProcessAllTouchInterests()
+        end
+    elseif not table.find({21, 23, 27, 29, 34, 43, 38, 39}, ak) then
+        if not table.find(c3, "part") then
+            table.insert(c3, "part")
+            table.insert(c3, "BossTrigger")
+            ProcessAllTouchInterests()
+            print("Đã thêm part vào c3")
+        end
     end
-elseif not table.find({21, 23, 27, 29, 34, 43, 38, 39}, ak) then
-    if not table.find(c3, "part") then
-        table.insert(c3, "part")
-        table.insert(c3, "BossTrigger")
-        ProcessAllTouchInterests() -- Xử lý ngay lập tức sau khi thêm
-        print("Đã thêm part vào c3")
-    end
+else
+    warn("ak (ActiveMission) chưa tồn tại, có thể đang ở menu.")
 end
-
 
 -- Nếu chưa thêm BossDoorTrigger thì kiểm tra định kỳ
 if not isBossDoorAdded then
@@ -1003,8 +1007,8 @@ if not isBossDoorAdded then
                                 table.insert(c3, "BossDoorTrigger")
                                 isBossDoorAdded = true
                                 print("Đã thêm BossDoorTrigger do FINAL FLOOR.")
-                                ProcessAllTouchInterests() -- Xử lý ngay lập tức sau khi thêm
-                                break -- Thoát vòng lặp vì đã xử lý xong
+                                ProcessAllTouchInterests()
+                                break
                             end
                         end
                     end
@@ -1013,6 +1017,7 @@ if not isBossDoorAdded then
         end
     end)
 end
+
 
 
 local c4 = {'Scarecrow1', 'Scarecrow2', 'Scarecrow3'}
