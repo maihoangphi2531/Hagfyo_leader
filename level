@@ -978,12 +978,21 @@ if ak ~= nil then
             ProcessAllTouchInterests()
         end
     elseif not table.find({21, 23, 27, 29, 34, 43, 38, 39}, ak) then
-        if not table.find(c3, "BossTrigger") then  
-            table.insert(c3, "BossTrigger")
-            ProcessAllTouchInterests()
-            print("Đã thêm part vào c3")
-        end
+    if not table.find(c3, "BossTrigger") then
+        table.insert(c3, "BossTrigger")
+        ProcessAllTouchInterests()
+        print("Đã thêm part vào c3")
     end
+    -- Thêm đoạn mã dịch chuyển tới MissionTimer
+    local missionTimer = workspace.MissionObjects.MissionStart.MissionTimer
+    if missionTimer then
+        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(missionTimer.CFrame)
+        print("Đã dịch chuyển tới MissionTimer")
+    else
+        print("Không tìm thấy MissionTimer trong workspace")
+    end
+end
+
 else
     warn("ak (ActiveMission) chưa tồn tại, có thể đang ở menu.")
 end
