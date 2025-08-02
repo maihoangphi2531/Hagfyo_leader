@@ -936,7 +936,7 @@ local c3 = {
 	'CastleGateTrigger', 'SceneTrigger', 'OutsideBossTrigger', 'Area1Trigger', 'Area2Trigger', 'Area3Trigger',
 	'FinishRing', 'StartWaveDefense', 'Trigger1', 'Trigger2', 'Trigger3', 'BossCutsceneTrigger', 'FloorTrigger',
 	'BossCutscene', 'BottomElevatorTrigger', 'MiddleElevatorTrigger', 'TopElevatorTrigger', 'ObbyTrigger5',
-	'MinibossExit', 'ArenaEntry0', 'ArenaEntry1', 'ArenaEntry2'
+	'MinibossExit', 'ArenaEntry0', 'Collider','ArenaEntry1', 'ArenaEntry2'
 }
 
 -- Cờ kiểm tra để không thêm BossDoorTrigger trùng
